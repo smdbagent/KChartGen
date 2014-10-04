@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Insert title here</title>
+<script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="js/snap.svg-min.js"></script>
+<script type="text/javascript" src="js/kchartgen.js"></script>
+<script type="text/javascript">
+	$(function(){
+		KChartGen.init('#svg');
+		KChartGen.demo();
+		
+		$('#seriesAColor').change(function(){
+			console.log($(this).val());
+			KChartGen.setSeriesAColor($(this).val());
+		});
+		
+		$('#seriesBColor').change(function(){
+			KChartGen.setSeriesBColor($(this).val());
+		});
+		
+		$('#xAxisLabelPos').change(function(){
+			KChartGen.setXAxisLabelPos($(this).val());
+		});
+		
+		$('#xAxisLabelText').change(function(){
+			KChartGen.setXAxisLabelText($(this).val());
+		});
+	})
+</script>
+</head>
+<body>
+<svg id="svg" width="400" height="400"></svg>
+<div>
+	<label for="">Series A color:</label> <input id="seriesAColor" type="color" name="seriesAColor" value="#ff0000">
+	<label for="">Series B color:</label> <input id="seriesBColor" type="color" name="seriesBColor" value="#E5E284">
+	<label for="">X axis label text:</label> <input id="xAxisLabelText" type="text" name="xAxisLabelText" value="2014" placeholder="X axis label">
+	<label for="">X axis label position:</label> <input id="xAxisLabelPos" type="range" name="xAxisLabelPos" value="70" min="0" max="100">
+</div>
+</body>
+</html>
