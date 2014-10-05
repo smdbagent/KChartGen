@@ -1,171 +1,214 @@
 /**
  * 
  */
+function assert(condition, message) {
+    if (!condition) {
+        message = message || "Assertion failed";
+        if (typeof Error !== "undefined") {
+            throw new Error(message);
+        }
+        throw message; // Fallback
+    }
+}
+
 var KChartGen;
 (function(KChartGen){
-	var snap, 
+	var snap,
+		width, height,
+		title,
 		xAxis,yAxis,
 		seriesA,seriesB,
-		seriesALabel,seriesBLabel,
-		title;
+		seriesALegend,seriesBLegend,
+		chartDimension;
 	
-	KChartGen.Constants = {			
-		MARGIN: 50,
+	function Point(x,y){
+		this.x = x;
+		this.y = y;
+	}
+	
+	KChartGen.Constants = {
+		MARGIN: 20,
 		SERIES_STROKE_WIDTH: 3,
-		SERIES_A_COLOR: "#DD1111",
-		
-		SERIES_B_COLOR: "#E5E284"
+		SERIES_SPLIT_OFFSET: 5
 	};
 	
 	KChartGen.init = function(container){
 		if(container){
 			snap = new Snap(container);
+			width = $(container).width();
+			height = $(container).height();
 		} else {
-			snap = new Snap(400,400);  
+			snap = new Snap(width=400,height=400);  
 		}
+		
+		chartDimension = {
+			topLeft : new Point(KChartGen.Constants.MARGIN, 100),
+			bottomRight: new Point(width-KChartGen.Constants.MARGIN, height-KChartGen.Constants.MARGIN),
+		
+			height: function(){return this.topLeft.y-this.bottomRight.y},
+			width: function(){return this.topLeft.x-this.bottomRight.x}
+		};
 	};
 	
-	KChartGen.demo = function(){
-		title = snap.text(KChartGen.Constants.MARGIN, 20, 'A SZEGEDI EMBEREK SZEMÉLYES ÉLETMINŐSÉGE');
+	function getXAxisWidth(){
+		return width-2*KChartGen.Constants.MARGIN;
+	}
+	
+	function getXAxisHeight(){
+		return height-KChartGen.Constants.MARGIN;
+	}
+	
+	function drawLegend(color, text, fontSize, position){
+		var seriesAIconLine = snap.line(position.x, position.y, position.x + 16, position.y);
+		seriesAIconLine.attr({
+			stroke: color,
+			strokeWidth: KChartGen.Constants.SERIES_STROKE_WIDTH
+		});
+		
+		var seriesAIconCircle = snap.circle(position.x + 8, position.y, KChartGen.Constants.SERIES_STROKE_WIDTH);
+		seriesAIconCircle.attr({
+			fill: "#fff",
+		    stroke: color,
+		    strokeWidth: KChartGen.Constants.SERIES_STROKE_WIDTH
+		});
+		
+		var seriesALegendText = snap.text(position.x + 30, position.y + fontSize/2, text);
+		seriesALegendText.attr({
+			'font-size': fontSize,
+			'font-weight': 'bold',
+			fill: color
+		});
+		
+		var seriesAIcon = snap.group(seriesAIconLine, seriesAIconCircle);
+		
+		return snap.group(seriesAIcon, seriesALegendText);
+	}
+	
+	function drawSeries(color, begin, end){
+		var lineA = snap.line(begin.x, begin.y, end.x, end.y);
+		lineA.attr({
+			stroke: color,
+			strokeWidth: KChartGen.Constants.SERIES_STROKE_WIDTH
+		});
+		var beginLineA = snap.circle(begin.x, begin.y, KChartGen.Constants.SERIES_STROKE_WIDTH);
+		beginLineA.attr({
+			fill: "#fff",
+		    stroke: color,
+		    strokeWidth: KChartGen.Constants.SERIES_STROKE_WIDTH
+		});
+		var endLineA = snap.circle(end.x, end.y, KChartGen.Constants.SERIES_STROKE_WIDTH);
+		endLineA.attr({
+			fill: "#fff",
+		    stroke: color,
+		    strokeWidth: KChartGen.Constants.SERIES_STROKE_WIDTH
+		});
+		
+		return snap.group(lineA, beginLineA, endLineA);
+	}
+	
+	function preprocess(data){
+//		assert(data.seriesA.end == data.seriesB.begin);
+		var splitPos = getXAxisWidth() * data.xAxis.splitPosition;
+		
+		data.seriesA.end = {
+				x: splitPos - KChartGen.Constants.SERIES_SPLIT_OFFSET,
+				y: getXAxisHeight()
+		};
+		data.seriesB.begin = {
+				x: splitPos + KChartGen.Constants.SERIES_SPLIT_OFFSET,
+				y: getXAxisHeight()
+		};
+		
+		if(!data.seriesA.begin.x){
+			data.seriesA.begin.x = KChartGen.Constants.MARGIN - KChartGen.Constants.SERIES_SPLIT_OFFSET;
+		}
+		if(!data.seriesB.end.x){
+			data.seriesB.end.x = width - KChartGen.Constants.MARGIN + KChartGen.Constants.SERIES_SPLIT_OFFSET;
+		}
+		
+		var aY = data.seriesA.begin.y;
+		var bY = data.seriesB.end.y;
+		if(aY <= 1){
+			data.seriesA.begin.y = Math.abs(chartDimension.height() * (1-aY)) + chartDimension.topLeft.y; 
+		}
+		if(bY <= 1){
+			data.seriesB.end.y = Math.abs(chartDimension.height() * (1-bY)) + chartDimension.topLeft.y; 
+		}
+	}
+	
+	KChartGen.build = function(data){
+		preprocess(data);
+		
+		title = snap.text(KChartGen.Constants.MARGIN, 20, data.title);
 		title.attr({
 			'font-size': 18,
 			'font-weight': 'bold',
 			fill: '#000'
 		});
 		
-		var seriesAIconLine = snap.line(KChartGen.Constants.MARGIN, 40, KChartGen.Constants.MARGIN + 16, 40);
-		seriesAIconLine.attr({
-			stroke: KChartGen.Constants.SERIES_A_COLOR,
-			strokeWidth: KChartGen.Constants.SERIES_STROKE_WIDTH
-		});
+		var seriesALegendPos = new Point(KChartGen.Constants.MARGIN, 40);
+		var seriesBLegendPos = new Point(KChartGen.Constants.MARGIN, 60);
 		
-		var seriesAIconCircle = snap.circle(KChartGen.Constants.MARGIN+8, 40, KChartGen.Constants.SERIES_STROKE_WIDTH);
-		seriesAIconCircle.attr({
-			fill: "#fff",
-		    stroke: KChartGen.Constants.SERIES_A_COLOR,
-		    strokeWidth: KChartGen.Constants.SERIES_STROKE_WIDTH
-		});
+		seriesALegend = drawLegend(data.seriesA.color, data.seriesA.label, data.seriesA.fontSize, seriesALegendPos);
+		seriesBLegend = drawLegend(data.seriesB.color, data.seriesB.label, data.seriesB.fontSize, seriesBLegendPos);
 		
-		var seriesALabelText = snap.text(KChartGen.Constants.MARGIN + 30, 45, 'Botka László');
-		seriesALabelText.attr({
-			'font-size': 12,
-			'font-weight': 'bold',
-			fill: KChartGen.Constants.SERIES_A_COLOR
-		});
-		
-		var seriesAIcon = snap.group(seriesAIconLine, seriesAIconCircle);
-		
-		seriesALabel = snap.group(seriesAIcon, seriesALabelText);
-		
-		
-		var seriesBIconLine = snap.line(KChartGen.Constants.MARGIN, 60, KChartGen.Constants.MARGIN + 16, 60);
-		seriesBIconLine.attr({
-			stroke: KChartGen.Constants.SERIES_B_COLOR,
-			strokeWidth: KChartGen.Constants.SERIES_STROKE_WIDTH
-		});
-		
-		var seriesBIconCircle = snap.circle(KChartGen.Constants.MARGIN+8, 60, KChartGen.Constants.SERIES_STROKE_WIDTH);
-		seriesBIconCircle.attr({
-			fill: "#fff",
-		    stroke: KChartGen.Constants.SERIES_B_COLOR,
-		    strokeWidth: KChartGen.Constants.SERIES_STROKE_WIDTH
-		});
-		
-		var seriesBIcon = snap.group(seriesBIconLine, seriesBIconCircle);
-		
-		var seriesBLabelText = snap.text(KChartGen.Constants.MARGIN + 30, 67, 'Kothencz János');
-		seriesBLabelText.attr({
-			'font-size': 14,
-			'font-weight': 'bold',
-			fill: KChartGen.Constants.SERIES_B_COLOR
-		});
-		
-		seriesBLabel = snap.group(seriesBIcon, seriesBLabelText);
-		
-		var xAxisLine = snap.line(KChartGen.Constants.MARGIN,350,350,350);
+		var xAxisLine = snap.line(KChartGen.Constants.MARGIN, height-KChartGen.Constants.MARGIN, 
+							width-KChartGen.Constants.MARGIN, height-KChartGen.Constants.MARGIN);
 		xAxisLine.attr({
 			stroke: '#666',
 			strokeWidth: 1
 		});
-		
 //		Axis tick, does not exist on original chart
 //		var xAxisSplitter = snap.line(250,290,250,310);
 //		xAxisSplitter.attr({
 //			stroke: '#000',
 //			strokeWidth: 2
 //		});
-		
-		var xAxisLabel = snap.text(240, 370, '2014');
-		
+		var xAxisLabel = snap.text(data.seriesA.end.x-10, data.seriesA.end.y+20, data.xAxis.splitLabel);
 		xAxis = snap.group(xAxisLine,xAxisLabel);
 		
-		var lineA = snap.line(KChartGen.Constants.MARGIN,250,245,350);
-		lineA.attr({
-			stroke: KChartGen.Constants.SERIES_A_COLOR,
-			strokeWidth: KChartGen.Constants.SERIES_STROKE_WIDTH
-		});
-		var beginLineA = snap.circle(KChartGen.Constants.MARGIN,250,KChartGen.Constants.SERIES_STROKE_WIDTH);
-		beginLineA.attr({
-			fill: "#fff",
-		    stroke: KChartGen.Constants.SERIES_A_COLOR,
-		    strokeWidth: KChartGen.Constants.SERIES_STROKE_WIDTH
-		});
-		var endLineA = snap.circle(245,350,KChartGen.Constants.SERIES_STROKE_WIDTH);
-		endLineA.attr({
-			fill: "#fff",
-		    stroke: KChartGen.Constants.SERIES_A_COLOR,
-		    strokeWidth: KChartGen.Constants.SERIES_STROKE_WIDTH
-		});
-		
-		seriesA = snap.group(lineA,beginLineA,endLineA);
-		
-		var lineB = snap.line(255,350,350,KChartGen.Constants.MARGIN+50);
-		lineB.attr({
-			stroke: KChartGen.Constants.SERIES_B_COLOR,
-			strokeWidth: KChartGen.Constants.SERIES_STROKE_WIDTH
-		});
-		var beginLineB = snap.circle(255,350,KChartGen.Constants.SERIES_STROKE_WIDTH);
-		beginLineB.attr({
-			fill: "#fff",
-		    stroke: KChartGen.Constants.SERIES_B_COLOR,
-		    strokeWidth: KChartGen.Constants.SERIES_STROKE_WIDTH
-		});
-		var endLineB = snap.circle(350,KChartGen.Constants.MARGIN + 50,KChartGen.Constants.SERIES_STROKE_WIDTH);
-		endLineB.attr({
-			fill: "#fff",
-		    stroke: KChartGen.Constants.SERIES_B_COLOR,
-		    strokeWidth: KChartGen.Constants.SERIES_STROKE_WIDTH
-		});
-		
-		seriesB = snap.group(lineB,beginLineB,endLineB);
+		seriesA = drawSeries(data.seriesA.color, data.seriesA.begin, data.seriesA.end);
+		seriesB = drawSeries(data.seriesB.color, data.seriesB.begin, data.seriesB.end);
 	};
 	
-	KChartGen.setSeriesAColor = function(color){
-		seriesA['0'].attr({stroke: color});
-		seriesA['1'].attr({stroke: color});
-		seriesA['2'].attr({stroke: color});
+	function setSeriesColor(series, legend, color){
+		series['0'].attr({stroke: color});
+		series['1'].attr({stroke: color});
+		series['2'].attr({stroke: color});
 		
-		seriesALabel['0']['0'].attr({stroke: color});
-		seriesALabel['0']['1'].attr({stroke: color});
-		seriesALabel['1'].attr({fill: color});
+		legend['0']['0'].attr({stroke: color});
+		legend['0']['1'].attr({stroke: color});
+		legend['1'].attr({fill: color});
+	}
+	
+	KChartGen.setSeriesAColor = function(color){
+		setSeriesColor(seriesA, seriesALegend, color);
 	};
 	
 	KChartGen.setSeriesBColor = function(color){
-		seriesB['0'].attr({stroke: color});
-		seriesB['1'].attr({stroke: color});
-		seriesB['2'].attr({stroke: color});
-		
-		seriesBLabel['0']['0'].attr({stroke: color});
-		seriesBLabel['0']['1'].attr({stroke: color});
-		seriesBLabel['1'].attr({fill: color});
+		setSeriesColor(seriesB, seriesBLegend, color);
 	};
 	
-	KChartGen.setSeriesALabelText = function(label){
-		seriesALabel['1'].attr({text: label});
+	KChartGen.setSeriesALegendText = function(label){
+		seriesALegend['1'].attr({text: label});
 	}
 	
-	KChartGen.setSeriesBLabelText = function(label){
-		seriesBLabel['1'].attr({text: label});
+	KChartGen.setSeriesBLegendText = function(label){
+		seriesBLegend['1'].attr({text: label});
+	}
+	
+	KChartGen.setSeriesABegin = function(pos){
+		var p = Math.abs(chartDimension.height() * (1-pos)) + chartDimension.topLeft.y;
+		
+		seriesA['0'].animate({y1: p}, 100);
+		seriesA['1'].animate({cy: p}, 100);
+	}
+	
+	KChartGen.setSeriesBEnd = function(pos){
+		var p = Math.abs(chartDimension.height() * (1-pos)) + chartDimension.topLeft.y;
+		
+		seriesB['0'].animate({y2: p}, 100);
+		seriesB['2'].animate({cy: p}, 100);
 	}
 	
 	KChartGen.setTitle = function(label){
@@ -177,16 +220,18 @@ var KChartGen;
 	};
 	
 	KChartGen.setXAxisLabelPos = function(pos){
-		seriesA['0'].animate({x2: KChartGen.Constants.MARGIN + 300*(pos/100)-5}, 100);
-		seriesA['2'].animate({cx: KChartGen.Constants.MARGIN + 300*(pos/100)-5}, 100);
+		var splitPoint = KChartGen.Constants.MARGIN + (width - 2*KChartGen.Constants.MARGIN) * pos;
 		
-		seriesB['0'].animate({x1: KChartGen.Constants.MARGIN + 300*(pos/100)+5}, 100);
-		seriesB['1'].animate({cx: KChartGen.Constants.MARGIN + 300*(pos/100)+5}, 100);
+		seriesA['0'].animate({x2: splitPoint-KChartGen.Constants.SERIES_SPLIT_OFFSET}, 100);
+		seriesA['2'].animate({cx: splitPoint-KChartGen.Constants.SERIES_SPLIT_OFFSET}, 100);
+		
+		seriesB['0'].animate({x1: splitPoint+KChartGen.Constants.SERIES_SPLIT_OFFSET}, 100);
+		seriesB['1'].animate({cx: splitPoint+KChartGen.Constants.SERIES_SPLIT_OFFSET}, 100);
 		
 //		Axis tick, does not exist on original chart
-//		xAxis['1'].animate({x1: KChartGen.Constants.MARGIN + 300*(pos/100)}, 100);
-//		xAxis['1'].animate({x2: KChartGen.Constants.MARGIN + 300*(pos/100)}, 100);
-		xAxis['1'].animate({x: KChartGen.Constants.MARGIN + 300*(pos/100)-10}, 100);
+//		xAxis['1'].animate({x1: splitPoint}, 100);
+//		xAxis['1'].animate({x2: splitPoint}, 100);
+		xAxis['1'].animate({x: splitPoint-10}, 100);
 	};
 	
 })(KChartGen = KChartGen || {});
