@@ -1,42 +1,77 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Insert title here</title>
-<script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
-<script type="text/javascript" src="js/snap.svg-min.js"></script>
-<script type="text/javascript" src="js/kchartgen.js"></script>
+<script type="text/javascript" src="../javascript/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../javascript/snap.svg-min.js"></script>
+<script type="text/javascript" src="../javascript/kchartgen.js"></script>
 <script type="text/javascript">
 	$(function(){
 		KChartGen.init('#svg');
 		KChartGen.demo();
+
+		$('#titleText').change(function(){
+			KChartGen.setTitle($(this).val());
+		});
+		$('#xAxisLabelPos').change(function(){
+			KChartGen.setXAxisLabelPos($(this).val());
+		});
+		$('#xAxisLabelText').change(function(){
+			KChartGen.setXAxisLabelText($(this).val());
+		});
 		
 		$('#seriesAColor').change(function(){
-			console.log($(this).val());
 			KChartGen.setSeriesAColor($(this).val());
+		});
+		$('#seriesALabelText').change(function(){
+			KChartGen.setSeriesALabelText($(this).val());
 		});
 		
 		$('#seriesBColor').change(function(){
 			KChartGen.setSeriesBColor($(this).val());
 		});
-		
-		$('#xAxisLabelPos').change(function(){
-			KChartGen.setXAxisLabelPos($(this).val());
-		});
-		
-		$('#xAxisLabelText').change(function(){
-			KChartGen.setXAxisLabelText($(this).val());
+		$('#seriesBLabelText').change(function(){
+			KChartGen.setSeriesBLabelText($(this).val());
 		});
 	})
 </script>
 </head>
 <body>
-<svg id="svg" width="400" height="400"></svg>
-<div>
-	<label for="">Series A color:</label> <input id="seriesAColor" type="color" name="seriesAColor" value="#ff0000">
-	<label for="">Series B color:</label> <input id="seriesBColor" type="color" name="seriesBColor" value="#E5E284">
-	<label for="">X axis label text:</label> <input id="xAxisLabelText" type="text" name="xAxisLabelText" value="2014" placeholder="X axis label">
-	<label for="">X axis label position:</label> <input id="xAxisLabelPos" type="range" name="xAxisLabelPos" value="70" min="0" max="100">
-</div>
+	<svg id="svg" width="600" height="400"></svg>
+	<div>
+		<div style="clear:both;margin: 20px 0">
+			<div>
+				<label for="titleText">Title:</label> <input id="titleText" type="text" name="titleText" value="A SZEGEDI EMBEREK SZEMÉLYES ÉLETMINŐSÉGE" placeholder="Type something..." style="width: 400px">
+			</div>
+			<div>
+				<label for="xAxisLabelText">X axis label text:</label> <input id="xAxisLabelText" type="text" name="xAxisLabelText" value="2014" placeholder="Type something...">
+				<label for="xAxisLabelPos">X axis label position:</label> <input id="xAxisLabelPos" type="range" name="xAxisLabelPos" value="70" min="0" max="100">
+			</div>
+		</div>
+		
+		<div style="float:left">
+			<fieldset>
+				<legend>Series A</legend>
+				<div>
+					<label for="seriesAColor">Pick a color:</label> <input id="seriesAColor" type="color" name="seriesAColor" value="#ff0000">
+				</div>
+				<div>
+					<label for="seriesALabelText">Text:</label> <input id="seriesALabelText" type="text" name="seriesALabelText" value="Botka László" placeholder="Type something...">
+				</div>
+			</fieldset>
+		</div>
+		<div style="float:left">
+			<fieldset>
+				<legend>Series B</legend>
+				<div>
+					<label for="seriesBColor">Pick a color:</label> <input id="seriesBColor" type="color" name="seriesBColor" value="#E5E284">
+				</div>
+				<div>
+					<label for="seriesBLabelText">Text:</label> <input id="seriesBLabelText" type="text" name="seriesBLabelText" value="Kothencz János" placeholder="Type something...">
+				</div>
+			</fieldset>
+		</div>
+	</div>
 </body>
 </html>
