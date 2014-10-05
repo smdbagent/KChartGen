@@ -1,41 +1,34 @@
+plugins {
+  id "com.eriwen.gradle.js" version "1.12.1"
+}
+
 apply plugin: 'java'
 apply plugin: 'eclipse'
-apply plugin: 'eclipse-wtp'
 
 sourceCompatibility = 1.7
 version = '1.0'
-jar {
-    manifest {
-        attributes 'Implementation-Title': 'Gradle Quickstart', 'Implementation-Version': version
-    }
-}
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    compile group: 'commons-collections', name: 'commons-collections', version: '3.2'
-    testCompile group: 'junit', name: 'junit', version: '4.+'
 }
 
-test {
-    systemProperties 'property': 'value'
-}
+def jsSrcDir = 'src/main/webapp/js'
 
-uploadArchives {
-    repositories {
-       flatDir {
-           dirs 'repos'
-       }
+javascript.source {
+    dev {
+        js {
+            srcDir jsSrcDir
+            include "*.js"
+            exclude "*.min.js"
+        }
     }
-}
-
-eclipse {
-  wtp {
-    facet {
-      //you can add some extra wtp facets; mandatory keys: 'name', 'version':
-      //facet name: 'wst.jsdt.web', version: '1.0'
-      }
-  }
+    prod {
+        js {
+            srcDir jsSrcDir
+            include "*.min.js"
+        }
+    }
 }
