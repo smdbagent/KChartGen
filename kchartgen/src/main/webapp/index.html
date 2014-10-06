@@ -20,36 +20,47 @@ input[type=range].vertical {
 	$(function(){
 // 		KChartGen.init('#svg');
 		KChartGen.demo('#svg');
+		KChartGen.updateSvgLink($('#export'));
 
 		$('#titleText').change(function(){
 			KChartGen.setTitle($(this).val());
+			KChartGen.updateSvgLink($('#export'));
 		});
 		$('#xAxisLabelPos').change(function(){
 			KChartGen.setXAxisLabelPos($(this).val());
+			KChartGen.updateSvgLink($('#export'));
 		});
 		$('#xAxisLabelText').change(function(){
 			KChartGen.setXAxisLabelText($(this).val());
+			KChartGen.updateSvgLink($('#export'));
 		});
 		
 		$('#seriesAColor').change(function(){
 			KChartGen.setSeriesAColor($(this).val());
+			KChartGen.updateSvgLink($('#export'));
 		});
 		$('#seriesALabelText').change(function(){
 			KChartGen.setSeriesALegendText($(this).val());
+			KChartGen.updateSvgLink($('#export'));
 		});
 		$('#seriesABegin').change(function(){
 			KChartGen.setSeriesABegin($(this).val());
+			KChartGen.updateSvgLink($('#export'));
 		});
 		
 		$('#seriesBColor').change(function(){
 			KChartGen.setSeriesBColor($(this).val());
+			KChartGen.updateSvgLink($('#export'));
 		});
 		$('#seriesBLabelText').change(function(){
 			KChartGen.setSeriesBLegendText($(this).val());
+			KChartGen.updateSvgLink($('#export'));
 		});
 		$('#seriesBEnd').change(function(){
 			KChartGen.setSeriesBEnd($(this).val());
+			KChartGen.updateSvgLink($('#export'));
 		});
+		
 	})
 </script>
 </head>
@@ -64,6 +75,10 @@ input[type=range].vertical {
 				<label for="xAxisLabelText">X axis label text:</label> <input id="xAxisLabelText" type="text" name="xAxisLabelText" value="2014" placeholder="Type something...">
 				<label for="xAxisLabelPos">X axis label position:</label> <input id="xAxisLabelPos" type="range" name="xAxisLabelPos" value="0.70" min="0" max="1" step="0.01">
 			</div>
+		</div>
+		
+		<div style="clear:both;margin: 10px 0;">
+			<a id="export" href-lang="image/svg+xml" download="chart.svg">Download as SVG</a>
 		</div>
 		
 		<div style="float:left">

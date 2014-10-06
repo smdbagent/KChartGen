@@ -32,13 +32,20 @@ var KChartGen;
 		SERIES_SPLIT_OFFSET: 5
 	};
 	
+	KChartGen.generate = function(data, dimension){
+		KChartGen.init(dimension);
+		KChartGen.build(data);
+	};
+	
 	KChartGen.init = function(container){
-		if(container){
+		if(typeof container === 'string'){
 			snap = new Snap(container);
 			width = $(container).width();
 			height = $(container).height();
+		} else if(typeof container === 'object'){
+			snap = new Snap(width=container.width,height=container.height);  
 		} else {
-			snap = new Snap(width=400,height=400);  
+			snap = new Snap(width=400,height=400);
 		}
 		
 		chartDimension = {
@@ -232,6 +239,20 @@ var KChartGen;
 //		xAxis['1'].animate({x1: splitPoint}, 100);
 //		xAxis['1'].animate({x2: splitPoint}, 100);
 		xAxis['1'].animate({x: splitPoint-10}, 100);
+	};
+	
+	KChartGen.exportSvgBase64 = function(){
+		return btoa(unescape(encodeURIComponent(snap.toString())));
+	};
+	
+	KChartGen.exportSvgRaw = function(){
+		return snap.toString();
+	};
+	
+	KChartGen.updateSvgLink = function($link){
+		return btoa(unescape(encodeURIComponent(snap.toString())));
+		 // Works in Firefox 3.6 and Webit and possibly any browser which supports the data-uri
+		$link.attr('href', 'data:image/svg+xml;base64,\n'+data);
 	};
 	
 })(KChartGen = KChartGen || {});
