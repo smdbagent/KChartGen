@@ -1,3 +1,7 @@
+<p align="center">
+  <a href="https://softwaremetric-database.com/dashboard/branches?branchId=992"><img src="https://softwaremetric-database.com/api/timeline/Sleeper9_KChartGen/develop"/></a>
+</p>
+
 KChartGen
 =========
 
